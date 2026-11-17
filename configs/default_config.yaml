@@ -1,0 +1,82 @@
+# =============================================================================
+# visual-slam-3d-mapping - default configuration TEMPLATE
+# =============================================================================
+# All units are SI: meters [m], seconds [s], radians [rad], [m/s^2], [rad/s].
+# Timestamps are int64 nanoseconds [ns] on a single monotonic clock.
+#
+# `null` means "not known yet". Code must fail loudly on a required `null`
+# value - camera intrinsics, IMU noise and extrinsics are NEVER guessed.
+# They are filled in from calibration (Phase 2) or device metadata.
+# =============================================================================
+
+config_version: 1
+
+# -----------------------------------------------------------------------------
+# Paths (relative to the repository root unless absolute)
+# -----------------------------------------------------------------------------
+paths:
+  data_root: data
+  datasets_dir: data/datasets          # EuRoC-style sequences: <seq>/cam0, <seq>/imu0
+  output_dir: data/outputs             # trajectories, point clouds, reports
+  sequence: null                       # e.g. seq_01_test_room
+
+# -----------------------------------------------------------------------------
+# Coordinate frame conventions (documentation; enforced at module boundaries)
+# -----------------------------------------------------------------------------
+frames:
+  camera: "C: optical; +Z forward, +X right, +Y down"
+  imu_body: "B: device-specific IMU axes; mapped to C via T_CB"
+  world: "W: gravity-aligned, +Z up (ENU)"
+
+# -----------------------------------------------------------------------------
+# Camera (cam0) - filled from calibration
+# -----------------------------------------------------------------------------
+camera:
+  model: pinhole
+  distortion_model: radtan             # radtan | equidistant
+  resolution: [null, null]             # [width, height] in pixels
+  intrinsics: [null, null, null, null] # [fx, fy, cx, cy] in pixels
+  distortion: [null, null, null, null] # radtan: [k1, k2, p1, p2]
+  nominal_rate_hz: null                # e.g. 30.0
+
+# -----------------------------------------------------------------------------
+# IMU (imu0) - noise densities from Allan variance (Phase 2)
+# -----------------------------------------------------------------------------
+imu:
+  nominal_rate_hz: null                # e.g. 100.0
+  gravity_magnitude: 9.80665           # [m/s^2], standard gravity
+  accelerometer_noise_density: null    # [m/s^2/sqrt(Hz)]
+  accelerometer_random_walk: null      # [m/s^3/sqrt(Hz)]
+  gyroscope_noise_density: null        # [rad/s/sqrt(Hz)]
+  gyroscope_random_walk: null          # [rad/s^2/sqrt(Hz)]
+
+# -----------------------------------------------------------------------------
+# Camera-IMU extrinsics & time offset - from Kalibr (Phase 2)
+# -----------------------------------------------------------------------------
+extrinsics:
+  T_CB: null                           # 4x4 row-major, maps points from B to C
+  time_offset_s: null                  # t_imu = t_cam + time_offset_s
+
+# -----------------------------------------------------------------------------
+# Data sanity checks (ingestion / calibration)
+# -----------------------------------------------------------------------------
+sanity_checks:
+  require_strictly_increasing_timestamps: true
+  reject_nan_inf: true
+  min_cam_imu_overlap_s: null          # minimum required temporal overlap [s]
+  max_gap_factor: null                 # flag gaps > factor * nominal period
+
+# -----------------------------------------------------------------------------
+# Reproducibility
+# -----------------------------------------------------------------------------
+reproducibility:
+  random_seed: 42                      # RANSAC and other stochastic steps
+
+# -----------------------------------------------------------------------------
+# Algorithm sections - populated in later phases
+# -----------------------------------------------------------------------------
+frontend: {}                           # Phase 3: features, tracking, keyframes
+backend: {}                            # Phase 4/5: preintegration, BA, loop closure
+
+logging:
+  level: info                          # trace | debug | info | warn | error

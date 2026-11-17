@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vislam-tools"
+version = "0.1.0"
+description = "Data ingestion, calibration helpers, visualization and evaluation for the visual-slam-3d-mapping project."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# Point-cloud processing & plotting (Phase 1 diagnostics, Phase 6 visualization).
+viz = [
+  "open3d>=0.17",
+  "matplotlib>=3.7",
+]
+# Trajectory evaluation (ATE / RPE).
+eval = [
+  "evo>=1.25",
+]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.4",
+]
+
+[tool.setuptools]
+package-dir = { "" = "python" }
+
+[tool.setuptools.packages.find]
+where = ["python"]
+include = ["vislam_tools*"]
+
+# -----------------------------------------------------------------------------
+# Ruff (lint + format) - PEP 8, mandatory type annotations
+# -----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["python"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",   # pycodestyle
+  "F",        # pyflakes
+  "I",        # isort
+  "N",        # pep8-naming
+  "UP",       # pyupgrade
+  "B",        # bugbear
+  "ANN",      # flake8-annotations (type hints on all signatures)
+  "PTH",      # prefer pathlib over os.path
+  "D",        # pydocstyle
+]
+ignore = [
+  "D100",     # module docstring not mandatory for every file
+  "D104",     # package docstring not mandatory
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"python/tests/**" = ["D", "ANN201"]
+
+# -----------------------------------------------------------------------------
+# Pytest
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+pythonpath = ["python"]
